@@ -104,12 +104,12 @@
  *         code using, for example, "-DNTIMES=7".
  */
 #ifdef NTIMES
-#if NTIMES<=1
-#   define NTIMES	10
+#if NTIMES<=10
+#   define NTIMES	100
 #endif
 #endif
 #ifndef NTIMES
-#   define NTIMES	10
+#   define NTIMES	100
 #endif
 
 /*  Users are allowed to modify the "OFFSET" variable, which *may* change the
