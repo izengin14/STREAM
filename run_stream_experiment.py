@@ -220,33 +220,45 @@ def get_cpu_list_for_threads(thread_count: int, base_cpu: int = 0) -> str:
 def main():
     """Main experiment runner."""
     if len(sys.argv) < 2:
-        print("Usage: python3 run_stream_experiment.py <thread_count> [cpu_list] [binary] [duration]")
+        print("Usage: python3 run_stream_experiment.py <thread_count> [cpu_list] [binary] [duration] [--save]")
         print("Example: python3 run_stream_experiment.py 4 1-4 streammod1 30")
         print("         python3 run_stream_experiment.py 4    # Auto-assigns cores 0-3")
-        print("         python3 run_stream_experiment.py 12   # Auto-assigns cores 0-11")
+        print("         python3 run_stream_experiment.py 4 streammod1 30 --save  # Save results to file")
         sys.exit(1)
     
     thread_count = int(sys.argv[1])
     
+    # Parse arguments
+    save_results = False  # Default: don't save results
+    args = sys.argv[2:]
+    
+    # Check for --save flag
+    if '--save' in args:
+        save_results = True
+        args.remove('--save')
+    
     # If cpu_list not provided, auto-assign based on thread count
-    if len(sys.argv) >= 3 and sys.argv[2] and not sys.argv[2].isdigit():
+    if len(args) >= 1 and args[0] and not args[0].isdigit():
         # Check if it's a CPU list format (contains '-' or ',')
-        if '-' in sys.argv[2] or ',' in sys.argv[2]:
-            cpu_list = sys.argv[2]
-            binary = sys.argv[3] if len(sys.argv) > 3 else "streammod1"
-            duration = float(sys.argv[4]) if len(sys.argv) > 4 else None
+        if '-' in args[0] or ',' in args[0]:
+            cpu_list = args[0]
+            binary = args[1] if len(args) > 1 else "streammod1"
+            duration = float(args[2]) if len(args) > 2 and args[2].replace('.', '').isdigit() else None
         else:
             # Treat as binary name
             cpu_list = get_cpu_list_for_threads(thread_count)
-            binary = sys.argv[2]
-            duration = float(sys.argv[3]) if len(sys.argv) > 3 else None
+            binary = args[0]
+            duration = float(args[1]) if len(args) > 1 and args[1].replace('.', '').isdigit() else None
     else:
         # Auto-assign CPU list
         cpu_list = get_cpu_list_for_threads(thread_count)
-        binary = sys.argv[2] if len(sys.argv) > 2 else "streammod1"
-        duration = float(sys.argv[3]) if len(sys.argv) > 3 else None
+        binary = args[0] if len(args) > 0 else "streammod1"
+        duration = float(args[1]) if len(args) > 1 and args[1].replace('.', '').isdigit() else None
     
-    print(f"Auto-assigned {thread_count} threads to CPUs {cpu_list}")
+    if cpu_list != get_cpu_list_for_threads(thread_count):
+        print(f"Using CPUs: {cpu_list}")
+    else:
+        print(f"Auto-assigned {thread_count} threads to CPUs {cpu_list}")
     
     print(f"=== STREAM Experiment ===")
     print(f"Threads: {thread_count}")
@@ -262,13 +274,19 @@ def main():
     power_stats = calculate_power_stats(power_readings)
     results.update(power_stats)
     
-    # Save results
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    results_file = BASE_DIR / f"experiment_results_{thread_count}thr_{timestamp}.json"
-    
-    import json
-    with open(results_file, 'w') as f:
-        json.dump(results, f, indent=2)
+    # Save results only if flag is not set
+    results_file = None
+    if save_results:
+        # Create results directory
+        results_dir = BASE_DIR / "results"
+        results_dir.mkdir(exist_ok=True)
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        results_file = results_dir / f"experiment_results_{thread_count}thr_{timestamp}.json"
+        
+        import json
+        with open(results_file, 'w') as f:
+            json.dump(results, f, indent=2)
     
     print(f"\n=== Results Summary ===")
     print(f"Execution time: {exec_time:.3f} s")
@@ -286,7 +304,8 @@ def main():
             energy_per_byte = power_stats['total_energy_mJ'] / results['total_bytes'] * 1e9  # nJ/byte
             print(f"Energy per byte: {energy_per_byte:.3f} nJ/byte")
     
-    print(f"\nResults saved to: {results_file}")
+    if save_results and results_file:
+        print(f"\nResults saved to: {results_file}")
     
     return results
 
