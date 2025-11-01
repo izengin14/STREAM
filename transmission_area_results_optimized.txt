@@ -1,0 +1,20 @@
+High-Performance Transmission Area Calculation Results
+====================================================
+Processing time: 0.062 seconds
+Data points processed: 2,434
+Processing speed: 39,362 points/second
+CPU cores used: 12
+Transmission period: 0.000s to 5.073s
+Duration: 5.073 seconds
+Average current during transmission: 424.002 mA
+Max current during transmission: 480.000 mA
+Min current during transmission: 120.000 mA
+Current std deviation: 91.513 mA
+Area under curve (transmission only): 2114.745 mA·s
+Area under curve: 2.114745 A·s
+Energy during transmission (assuming 1V): 2.114745 mJ
+
+Performance Comparison:
+Total measurement area: 2926.694 mA·s
+Transmission area: 2114.745 mA·s
+Transmission area as % of total: 72.3%

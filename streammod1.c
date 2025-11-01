@@ -41,12 +41,16 @@
 /*  5. Absolutely no warranty is expressed or implied.                   */
 /*-----------------------------------------------------------------------*/
 # include <stdio.h>
+# include <stdlib.h>
 # include <unistd.h>
 # include <math.h>
 # include <float.h>
 # include <limits.h>
 # include <sys/time.h>
 # include <time.h>
+# ifdef _OPENMP
+# include <omp.h>
+# endif
 
 /*-----------------------------------------------------------------------
  * INSTRUCTIONS:
@@ -213,6 +217,29 @@ main()
     unsigned long long iterations = 0;
     unsigned long long total_bytes;
     double      t1, t2, start_time, elapsed;
+    
+    /* Force thread count and debug OpenMP settings */
+#ifdef _OPENMP
+    char *omp_threads = getenv("OMP_NUM_THREADS");
+    int requested_threads = 4;  // Default
+    if (omp_threads != NULL) {
+        requested_threads = atoi(omp_threads);
+    }
+    omp_set_num_threads(requested_threads);
+    omp_set_dynamic(0);  /* Disable dynamic adjustment */
+    printf("Environment OMP_NUM_THREADS: %s\n", omp_threads ? omp_threads : "not set");
+    printf("Requested threads: %d\n", requested_threads);
+    printf("Max threads available: %d\n", omp_get_max_threads());
+    // Get actual thread count inside a parallel region
+    int actual_threads = 1;
+    #pragma omp parallel
+    {
+        if (omp_get_thread_num() == 0) {
+            actual_threads = omp_get_num_threads();
+        }
+    }
+    printf("Using %d OpenMP threads\n", actual_threads);
+#endif
 
     /* Initialize arrays */
 #pragma omp parallel for
@@ -247,8 +274,15 @@ main()
     t1 = mysecond();
 
 #pragma omp parallel for
-    for (j=0; j<STREAM_ARRAY_SIZE; j++)
+    for (j=0; j<STREAM_ARRAY_SIZE; j++) {
         c[j] = a[j];
+        // Multiple intensive operations for maximum CPU load
+        b[j] = c[j] * 2.0;
+        a[j] = b[j] + c[j];
+        c[j] = a[j] * b[j];
+        b[j] = c[j] / 2.0;
+        a[j] = b[j] + c[j] + a[j];
+    }
     t2 = mysecond();
        
     iterations++;

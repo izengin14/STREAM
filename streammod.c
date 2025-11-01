@@ -21,7 +21,7 @@
  *         the available cache size.  There are a variety of ways to
  *         determine the relevant cache sizes, as well as user
  *         preferences, but the relevant point is that it should be
- *         larger than the available cache size for good performance.
+ *         larger than the available cache size for good performance.&&
  *         In the distributed version of STREAM, the array size is
  *         set to give good performance on a variety of systems.
  *

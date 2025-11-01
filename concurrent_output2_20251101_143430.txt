@@ -1,0 +1,25 @@
+Environment OMP_NUM_THREADS: 4
+Using 1 OpenMP threads
+Max threads available: 4
+Running STREAM benchmark for 10 seconds...
+Timestamp				Iteration	Elapsed		Iteration Time
+--------------------------------------------------------------------
+Iteration 1: 14:34:31.309010		Elapsed: 0.336933		Time: 0.336823
+Iteration 2: 14:34:31.710422		Elapsed: 0.738346		Time: 0.391071
+Iteration 3: 14:34:32.049693		Elapsed: 1.077616		Time: 0.329072
+Iteration 4: 14:34:32.345654		Elapsed: 1.373578		Time: 0.285740
+Iteration 5: 14:34:32.694118		Elapsed: 1.722042		Time: 0.338289
+Iteration 6: 14:34:33.061028		Elapsed: 2.088952		Time: 0.356717
+Iteration 7: 14:34:33.400731		Elapsed: 2.428654		Time: 0.314302
+Iteration 8: 14:34:33.689062		Elapsed: 2.716985		Time: 0.278127
+Iteration 9: 14:34:34.016978		Elapsed: 3.044902		Time: 0.317701
+Iteration 10: 14:34:34.425571		Elapsed: 3.453495		Time: 0.398350
+Iteration 11: 14:34:34.758788		Elapsed: 3.786711		Time: 0.322999
+Iteration 12: 14:34:35.080537		Elapsed: 4.108460		Time: 0.311531
+Iteration 13: 14:34:35.457815		Elapsed: 4.485739		Time: 0.367067
+Iteration 14: 14:34:35.797760		Elapsed: 4.825683		Time: 0.329535
+Iteration 15: 14:34:36.156140		Elapsed: 5.184063		Time: 0.348158
+
+------------------------------------------------------------
+SUMMARY: 14:34:30.972076 to 14:34:36.166336, iterations=15, time_taken=5.194259, total_bytes=24000000000
+14:34:30.97207614:34:36.166336Data saved to: stream_timestamps.txt

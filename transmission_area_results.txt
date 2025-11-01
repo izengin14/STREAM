@@ -1,0 +1,16 @@
+Transmission Area Calculation Results
+====================================
+Transmission period: 0.000s to 5.073s
+Duration: 5.073 seconds
+Data points: 2434
+Average current during transmission: 424.002 mA
+Max current during transmission: 480.000 mA
+Min current during transmission: 120.000 mA
+Area under curve (transmission only): 2124.675 mA·s
+Area under curve: 2.124675 A·s
+Energy during transmission (assuming 1V): 2.124675 mJ
+
+Comparison:
+Total measurement area: 2926.694 mA·s
+Transmission area: 2124.675 mA·s
+Transmission area as % of total: 72.6%

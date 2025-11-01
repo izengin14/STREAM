@@ -1,0 +1,20 @@
+{
+  "experiment_type": "concurrent",
+  "thread_count_per_instance": 4,
+  "cpu_list": "1-4",
+  "instance1": {
+    "execution_time_s": 5.58342719078064,
+    "instance_id": 1
+  },
+  "instance2": {
+    "execution_time_s": 5.432268857955933,
+    "instance_id": 2
+  },
+  "instance1_time_s": 5.58342719078064,
+  "instance2_time_s": 5.432268857955933,
+  "overall_time_s": 5.585229873657227,
+  "total_bytes_instance1": 0,
+  "total_bytes_instance2": 0,
+  "total_bytes_combined": 0,
+  "combined_bandwidth_MB_s": 0.0
+}

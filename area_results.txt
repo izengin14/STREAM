@@ -1,0 +1,11 @@
+Area Calculation Results
+======================
+Time range: 0.000s to 9.998s
+Duration: 9.998 seconds
+Data points: 4759
+Average current: 297.256 mA
+Max current: 480.000 mA
+Min current: 80.000 mA
+Area under curve: 2926.694 mA·s
+Area under curve: 2.926694 A·s
+Energy (assuming 1V): 2.926694 mJ

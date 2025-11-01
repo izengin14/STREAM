@@ -1,0 +1,10 @@
+{
+  "total_bytes": 72000000000,
+  "time_taken_s": 5.015363,
+  "bandwidth_MB_s": 13690.84366998959,
+  "bandwidth_GB_s": 13.369964521474209,
+  "iterations": 45,
+  "execution_time_s": 5.145948886871338,
+  "thread_count": 12,
+  "cpu_list": "0-11"
+}
