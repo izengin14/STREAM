@@ -6,7 +6,8 @@
 )& 
 sleep 1
 (
-    cd /home/weiting/Desktop/STREAM || exit
+    cd /home/weiting
+/Desktop/STREAM || exit
     ./streammod1
 )&
 
