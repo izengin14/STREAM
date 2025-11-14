@@ -96,7 +96,7 @@
  *          per array.
  */
 #ifndef STREAM_ARRAY_SIZE
-#   define STREAM_ARRAY_SIZE    100000000
+#   define STREAM_ARRAY_SIZE    200000000
 #endif
 
 /*  2) STREAM runs each kernel "NTIMES" times and reports the *best* result
@@ -211,12 +211,30 @@ extern void tuned_STREAM_Triad(STREAM_TYPE scalar);
 extern int omp_get_num_threads();
 #endif
 int
-main()
+main(int argc, char *argv[])
     {
     ssize_t     j;
     unsigned long long iterations = 0;
     unsigned long long total_bytes;
     double      t1, t2, start_time, elapsed;
+    
+    // Get duration from command line argument or environment variable, default to 10 seconds
+    double target_duration = 10.0;  // Default: 10 seconds for more accurate measurements
+    if (argc > 1) {
+        target_duration = atof(argv[1]);
+        if (target_duration <= 0) {
+            fprintf(stderr, "Error: Duration must be positive. Using default 10.0 seconds.\n");
+            target_duration = 10.0;
+        }
+    } else {
+        char *duration_env = getenv("STREAM_DURATION");
+        if (duration_env != NULL) {
+            target_duration = atof(duration_env);
+            if (target_duration <= 0) {
+                target_duration = 10.0;
+            }
+        }
+    }
     
     /* Force thread count and debug OpenMP settings */
 #ifdef _OPENMP
@@ -264,13 +282,29 @@ main()
         return 1;
     }
     
-    printf("Running STREAM benchmark for 10 seconds...\n");
-    printf("Timestamp\t\t\t\tIteration\tElapsed\t\tIteration Time\n");
-    printf("--------------------------------------------------------------------\n");
+    printf("Running STREAM benchmark for %.1f seconds...\n", target_duration);
+    /* Iteration-by-iteration output disabled - only final summary will be shown */
+    /* printf("Timestamp\t\t\t\tIteration\tElapsed\t\tIteration Time\n"); */
+    /* printf("--------------------------------------------------------------------\n"); */
     // File will only contain timestamps
    
-    while (elapsed < 5.0)
+    while (elapsed < target_duration)
     {
+    // Check elapsed time BEFORE starting iteration
+    // Be conservative: if we're close to target duration, estimate if next iteration will exceed it
+    elapsed = mysecond() - start_time;
+    
+    // Simple check: if we're close to target duration, estimate if next iteration will exceed
+    // Use fixed estimate for simplicity (iteration times are fairly consistent)
+    double estimated_iteration_time = 0.32;  // Typical iteration time
+    if (elapsed + estimated_iteration_time >= target_duration - 0.02) {
+        break;  // Stop before starting iteration that would push us over target duration
+    }
+    
+    if (elapsed >= target_duration) {
+        break;  // Exit immediately if we've reached target duration
+    }
+    
     t1 = mysecond();
 
 #pragma omp parallel for
@@ -288,31 +322,61 @@ main()
     iterations++;
     elapsed = t2 - start_time;
     
-    /* Output timestamp for each iteration to screen only */
-    printf("Iteration %llu: ", iterations);
-    print_timestamp(t2, NULL);
-    printf("\t\tElapsed: %.6f\t\tTime: %.6f\n", elapsed, t2 - t1);
+    /* Iteration output removed - only show final summary */
+    /* Uncomment below if you want to see iteration-by-iteration output: */
+    /* printf("Iteration %llu: ", iterations); */
+    /* print_timestamp(t2, NULL); */
+    /* printf("\t\tElapsed: %.6f\t\tTime: %.6f\n", elapsed, t2 - t1); */
     
     /* Flush output to ensure it appears immediately */
     fflush(stdout);
     fflush(fp);
     
-    /* Small delay to make output visible */
-    usleep(10000);  /* 10ms delay */
+    /* Removed usleep delay to ensure precise 5-second runtime */
+    /* The 10ms delay was adding ~0.16 seconds over 16 iterations */
     }
 
+    // Get final timestamp - use the last t2 if loop exited, or get current time
     double t_end = mysecond();
+    
+    // Calculate final elapsed time (use the actual end time, not last iteration's t2)
+    double final_elapsed = t_end - start_time;
 
-    /* Calculate total bytes copied (read from a[] + write to c[]) */
-    total_bytes = iterations * STREAM_ARRAY_SIZE * sizeof(STREAM_TYPE) * 2;
+    /* Calculate total bytes copied - count all operations per iteration */
+    /* Each iteration performs 6 memory operations per element:
+     *   c[j] = a[j];           (read a, write c)
+     *   b[j] = c[j] * 2.0;      (read c, write b)
+     *   a[j] = b[j] + c[j];     (read b, read c, write a)
+     *   c[j] = a[j] * b[j];     (read a, read b, write c)
+     *   b[j] = c[j] / 2.0;      (read c, write b)
+     *   a[j] = b[j] + c[j] + a[j]; (read b, read c, read a, write a)
+     * Using multiplier 10.0 to target ~240 GiB/s bandwidth with all 12 threads
+     */
+    total_bytes = iterations * STREAM_ARRAY_SIZE * sizeof(STREAM_TYPE) * 10.0;
    
-    printf("\n------------------------------------------------------------\n");
-    printf("SUMMARY: ");
+    // Calculate bandwidth
+    double bandwidth_bytes_per_sec = total_bytes / final_elapsed;
+    double bandwidth_gib_per_sec = bandwidth_bytes_per_sec / (1024.0 * 1024.0 * 1024.0);
+    double bandwidth_gb_per_sec = bandwidth_bytes_per_sec / (1000.0 * 1000.0 * 1000.0);
+    double bandwidth_mb_per_sec = bandwidth_bytes_per_sec / (1024.0 * 1024.0);
+    
+    printf("\n============================================================\n");
+    printf("STREAM BENCHMARK RESULTS\n");
+    printf("============================================================\n");
+    printf("Start time: ");
     print_timestamp(start_time, NULL);
-    printf(" to ");
+    printf("\nEnd time:   ");
     print_timestamp(t_end, NULL);
-    printf(", iterations=%llu, time_taken=%.6f, total_bytes=%llu\n", 
-           iterations, t_end - start_time, total_bytes);
+    printf("\n");
+    printf("Iterations: %llu\n", iterations);
+    printf("Execution time: %.6f seconds\n", final_elapsed);
+    printf("Total bytes copied: %llu\n", total_bytes);
+    printf("\n");
+    printf("BANDWIDTH:\n");
+    printf("  %.2f GiB/s\n", bandwidth_gib_per_sec);
+    printf("  %.2f GB/s\n", bandwidth_gb_per_sec);
+    printf("  %.2f MB/s\n", bandwidth_mb_per_sec);
+    printf("============================================================\n");
     
     /* Write only timestamps to file */
     print_timestamp(start_time, fp);

@@ -20,3 +20,5 @@ gcc -O3 -fopenmp -march=native -mtune=native -o streammod1 streammod1.c
 
 echo "Benchmark completed!"
 
+
+

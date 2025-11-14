@@ -1,0 +1,88 @@
+#!/bin/bash
+# Example commands for different thread configurations
+# This file shows various ways to run concurrent benchmarks
+
+echo "============================================================"
+echo "CONCURRENT BENCHMARK EXAMPLES"
+echo "============================================================"
+echo ""
+
+# Check if streammod1 exists
+if [ ! -f "./streammod1" ]; then
+    echo "⚠ Warning: streammod1 not found. Compile first with:"
+    echo "  gcc -fopenmp -O3 -o streammod1 streammod1.c"
+    echo ""
+fi
+
+echo "4 & 4 THREADS CONFIGURATIONS:"
+echo "=============================="
+echo ""
+echo "# Same cores (maximum contention):"
+echo "./run_concurrent_benchmark.sh 4 4 10 \"0-3\" \"0-3\""
+echo ""
+echo "# Separate cores (no contention):"
+echo "./run_concurrent_benchmark.sh 4 4 10 \"0-3\" \"4-7\""
+echo ""
+echo "# Overlapping cores (moderate contention):"
+echo "./run_concurrent_benchmark.sh 4 4 10 \"0-3\" \"2-5\""
+echo ""
+echo ""
+
+echo "8 & 8 THREADS CONFIGURATIONS:"
+echo "=============================="
+echo ""
+echo "# Same cores (maximum contention):"
+echo "./run_concurrent_benchmark.sh 8 8 10 \"0-7\" \"0-7\""
+echo ""
+echo "# Separate cores (no contention):"
+echo "./run_concurrent_benchmark.sh 8 8 10 \"0-7\" \"4-11\""
+echo ""
+echo "# Overlapping cores (moderate contention):"
+echo "./run_concurrent_benchmark.sh 8 8 10 \"0-7\" \"2-9\""
+echo ""
+echo ""
+
+echo "12 & 12 THREADS CONFIGURATIONS:"
+echo "================================"
+echo ""
+echo "# Same cores (maximum contention - all cores):"
+echo "./run_concurrent_benchmark.sh 12 12 10 \"0-11\" \"0-11\""
+echo ""
+echo "# Split cores (6 cores each):"
+echo "./run_concurrent_benchmark.sh 12 12 10 \"0-5\" \"6-11\""
+echo ""
+echo "# Overlapping cores:"
+echo "./run_concurrent_benchmark.sh 12 12 10 \"0-11\" \"4-11\""
+echo ""
+echo ""
+
+echo "8 & 4 THREADS CONFIGURATIONS:"
+echo "=============================="
+echo ""
+echo "# 8 threads on first 8 cores, 4 threads on same first 4 (overlap):"
+echo "./run_concurrent_benchmark.sh 8 4 10 \"0-7\" \"0-3\""
+echo ""
+echo "# 8 threads on first 8 cores, 4 threads on separate cores:"
+echo "./run_concurrent_benchmark.sh 8 4 10 \"0-7\" \"8-11\""
+echo ""
+echo "# 8 threads on first 8 cores, 4 threads overlapping:"
+echo "./run_concurrent_benchmark.sh 8 4 10 \"0-7\" \"4-7\""
+echo ""
+echo ""
+
+echo "OTHER CONFIGURATIONS:"
+echo "====================="
+echo ""
+echo "# 6 & 6 threads:"
+echo "./run_concurrent_benchmark.sh 6 6 10 \"0-5\" \"6-11\""
+echo ""
+echo "# 4 & 8 threads:"
+echo "./run_concurrent_benchmark.sh 4 8 10 \"0-3\" \"4-11\""
+echo ""
+echo ""
+
+echo "============================================================"
+echo "To run any of these, copy and paste the command"
+echo "============================================================"
+
+

@@ -61,3 +61,5 @@ The similar results with 4 vs 12 threads show:
 
 The real comparison will be **single vs concurrent instances** - that's where you'll see the memory contention effects!
 
+
+

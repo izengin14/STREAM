@@ -118,15 +118,17 @@ def run_stream_with_affinity(
         )
         monitoring_thread.start()
     
-    # Run STREAM
+    # Run STREAM - it will run for exactly ~5 seconds (controlled by streammod1.c)
     start_time = time.time()
     try:
+        # streammod1.c runs for 5 seconds internally (while elapsed < 5.0)
+        # Use reasonable timeout as safety limit (should complete in ~5-6 seconds)
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             env=env,
-            timeout=300  # 5 minute timeout
+            timeout=10  # Safety timeout (benchmark completes in ~5 seconds)
         )
         end_time = time.time()
         execution_time = end_time - start_time
@@ -289,14 +291,29 @@ def main():
             json.dump(results, f, indent=2)
     
     print(f"\n=== Results Summary ===")
-    print(f"Execution time: {exec_time:.3f} s")
+    # Use STREAM's reported time_taken for accuracy (it's measured inside the loop)
+    # This is more accurate than wall-clock time which includes overhead
+    if 'time_taken_s' in results and results['time_taken_s'] > 0:
+        runtime = results['time_taken_s']
+        print(f"Execution time (STREAM reported): {runtime:.6f} s")
+    else:
+        runtime = exec_time
+        print(f"Execution time (wall clock): {runtime:.3f} s")
+    
     if 'total_bytes' in results:
         print(f"Total bytes: {results['total_bytes']:,.0f}")
         if 'bandwidth_MB_s' in results:
-            print(f"Bandwidth: {results['bandwidth_MB_s']:.2f} MB/s ({results.get('bandwidth_GB_s', 0):.3f} GB/s)")
+            # Recalculate using STREAM's reported time for consistency
+            if 'time_taken_s' in results and results['time_taken_s'] > 0:
+                bw_mb = results['total_bytes'] / results['time_taken_s'] / (1024**2)
+                bw_gb = results['total_bytes'] / results['time_taken_s'] / (1024**3)
+                print(f"Bandwidth: {bw_mb:.2f} MB/s ({bw_gb:.3f} GB/s)")
+            else:
+                print(f"Bandwidth: {results['bandwidth_MB_s']:.2f} MB/s ({results.get('bandwidth_GB_s', 0):.3f} GB/s)")
         else:
-            bandwidth = results['total_bytes'] / exec_time / (1024**2)  # MB/s
-            print(f"Bandwidth: {bandwidth:.2f} MB/s")
+            bandwidth_mb = results['total_bytes'] / runtime / (1024**2)  # MB/s
+            bandwidth_gb = results['total_bytes'] / runtime / (1024**3)  # GB/s
+            print(f"Bandwidth: {bandwidth_mb:.2f} MB/s ({bandwidth_gb:.3f} GB/s)")
     if power_stats:
         print(f"Average VDDQ current: {power_stats['avg_current_mA']:.2f} mA")
         print(f"Total energy: {power_stats['total_energy_mJ']:.2f} mJ")
@@ -311,4 +328,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

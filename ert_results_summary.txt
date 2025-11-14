@@ -1,0 +1,111 @@
+================================================================================
+ERT (Empirical-Roofline-Toolkit) Results Summary
+================================================================================
+Generated: $(date)
+System: NVIDIA Tegra ARM-based
+
+================================================================================
+KEY PERFORMANCE METRICS
+================================================================================
+
+Peak DRAM Bandwidth: 88.80 GB/s
+  - Configuration: 12 threads, 1 FLOP/byte
+  - This is the theoretical maximum memory bandwidth your system can achieve
+
+Peak Computational Throughput: 70.95 GFLOP/s
+  - Configuration: 12 threads, 4 FLOPs/byte
+  - This is the theoretical maximum compute performance
+
+Ridge Point (Compute/Memory Boundary):
+  - Arithmetic Intensity: ~0.80 FLOPs/byte
+  - Below this: Memory-bound (performance limited by bandwidth)
+  - Above this: Compute-bound (performance limited by compute)
+
+================================================================================
+DETAILED RESULTS BY CONFIGURATION
+================================================================================
+
+Threads | FLOPs | Peak (GFLOP/s) | L1 (GB/s) | L2 (GB/s) | L3 (GB/s) | DRAM (GB/s)
+--------|-------|----------------|-----------|-----------|-----------|------------
+   1    |   1   |     5.85       |   93.58   |   31.96   |   24.09   |   18.00
+   2    |   1   |    11.68       |  186.85   |   61.02   |   45.95   |   34.04
+   4    |   1   |    23.26       |  372.04   |  117.51   |   86.82   |   64.60
+   8    |   1   |    46.53       |  744.23   |  152.28   |    N/A    |   81.58
+  12    |   1   |    69.68       | 1114.60   |  161.28   |  119.41   |   88.71
+  12    |   4   |    70.95       |  283.46   |  131.68   |    N/A    |   88.58
+
+================================================================================
+MEMORY HIERARCHY BANDWIDTHS (Best Case - 12 threads)
+================================================================================
+
+L1 Cache:  1114.60 GB/s
+L2 Cache:   161.28 GB/s
+L3 Cache:   119.41 GB/s
+DRAM:        88.80 GB/s
+
+================================================================================
+ROOFLINE MODEL INTERPRETATION
+================================================================================
+
+The roofline model shows the performance ceiling of your system:
+
+1. MEMORY-BOUND REGION (Left side of plot):
+   - Low arithmetic intensity (< 0.8 FLOPs/byte)
+   - Performance = DRAM Bandwidth × Arithmetic Intensity
+   - Maximum: 88.80 GB/s × Arithmetic Intensity
+
+2. COMPUTE-BOUND REGION (Right side of plot):
+   - High arithmetic intensity (> 0.8 FLOPs/byte)
+   - Performance = Peak GFLOP/s (flat at 70.95 GFLOP/s)
+
+3. RIDGE POINT:
+   - At ~0.8 FLOPs/byte
+   - Where compute and memory bounds intersect
+   - This is the optimal balance point
+
+================================================================================
+COMPARISON WITH STREAM BENCHMARK
+================================================================================
+
+Your STREAM benchmark measures actual achieved bandwidth in real workloads.
+ERT measures the theoretical peak bandwidth.
+
+To compare:
+  Efficiency = (STREAM Bandwidth) / (ERT Peak DRAM Bandwidth) × 100%
+
+If your STREAM results show ~80 GB/s, you're achieving:
+  80 / 88.80 × 100% = ~90% efficiency (excellent!)
+
+================================================================================
+FILES GENERATED
+================================================================================
+
+1. Roofline Plot: ~/Desktop/STREAM/ert_roofline.png (110 KB)
+   - Visual representation of performance limits
+   - Shows compute-bound and memory-bound regions
+
+2. ERT Raw Results: ~/Desktop/ER/Empirical_Roofline_Tool-1.1.0/Results.tegra.01/
+   - Detailed benchmark data
+   - Graph files (.ps format) in subdirectories
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Compare with your STREAM results:
+   python3 ~/Desktop/STREAM/compare_ert_stream.py \
+     <ert_summary_file> \
+     <stream_output_file>
+
+2. Use the roofline model to understand:
+   - Where your application sits on the roofline
+   - Whether you're memory-bound or compute-bound
+   - Opportunities for optimization
+
+3. View the roofline plot:
+   - Transfer ~/Desktop/STREAM/ert_roofline.png to a machine with display
+   - Or use remote desktop/X11 forwarding if available
+   - File size: 110 KB
+
+================================================================================
+
